@@ -6,8 +6,7 @@ import { getCookie, setCookie, deleteCookie } from 'hono/cookie'
 import { secureHeaders } from 'hono/secure-headers'
 import { cors } from 'hono/cors'
 import Stripe from "stripe";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
+import { compare as legacyBcryptCompare } from "./vendor/legacy-bcrypt.js";
 import crypto from "crypto";
 
 import { databaseManager } from "./adapters/manager.js";
@@ -72,8 +71,8 @@ const CSRF_MAX_ENTRIES = 50000; // LRU eviction threshold
 /**
  * LRU eviction helper that removes oldest entries when over limit
  *
- * Prevents memory leaks in rate limiter and CSRF stores by removing oldest
- * entries based on timestamp when store exceeds maxEntries threshold.
+ * Prevents memory leaks in CSRF store by removing oldest entries based on
+ * timestamp when store exceeds maxEntries threshold.
  *
  * @param {Map} store - Map to evict entries from
  * @param {number} maxEntries - Maximum entries before eviction
@@ -201,117 +200,6 @@ setInterval(() => {
     logger.debug('CSRF cleanup completed', { removedTokens: cleaned });
   }
 }, 60 * 60 * 1000); // Run every hour
-
-// ==== RATE LIMITING ====
-const rateLimitStore = new Map(); // key -> { count, resetAt }
-const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX_ENTRIES = 100000; // LRU eviction threshold
-
-// Route-specific rate limits
-const RATE_LIMITS = {
-  auth: { limit: 10, window: RATE_LIMIT_WINDOW },       // /api/signin, /api/signup
-  payment: { limit: 5, window: RATE_LIMIT_WINDOW },     // /api/checkout, /api/portal
-  global: { limit: 300, window: RATE_LIMIT_WINDOW }     // all other /api routes
-};
-
-/**
- * Get client IP address from request
- *
- * Checks X-Forwarded-For header first (for proxies), falls back to
- * socket address. Handles comma-separated forwarded IPs.
- *
- * @param {Context} c - Hono context
- * @returns {string} Client IP address
- */
-function getClientIP(c) {
-  const forwarded = c.req.header('x-forwarded-for');
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
-  }
-  return c.req.raw?.socket?.remoteAddress || 'unknown';
-}
-
-/**
- * Get rate limit category for a given path
- *
- * @param {string} path - Request path
- * @returns {string} Rate limit category: 'auth', 'payment', or 'global'
- */
-function getRateLimitCategory(path) {
-  if (path === '/api/signin' || path === '/api/signup') {
-    return 'auth';
-  }
-  if (path === '/api/checkout' || path === '/api/portal') {
-    return 'payment';
-  }
-  return 'global';
-}
-
-/**
- * Rate limiting middleware
- *
- * Tracks requests per IP+category with sliding window. Returns 429 when
- * limit exceeded. Adds X-RateLimit-Remaining and Retry-After headers.
- *
- * @async
- * @param {Context} c - Hono context
- * @param {Function} next - Next middleware function
- * @returns {Promise<Response|void>} 429 error or continues to next middleware
- */
-async function rateLimitMiddleware(c, next) {
-  // Skip rate limiting for health check and static files
-  if (c.req.path === '/api/health' || !c.req.path.startsWith('/api/')) {
-    return next();
-  }
-
-  const ip = getClientIP(c);
-  const category = getRateLimitCategory(c.req.path);
-  const { limit, window } = RATE_LIMITS[category];
-  const key = `${ip}:${category}`;
-  const now = Date.now();
-
-  let record = rateLimitStore.get(key);
-
-  // Reset if window expired
-  if (!record || now > record.resetAt) {
-    record = { count: 0, resetAt: now + window };
-    rateLimitStore.set(key, record);
-  }
-
-  record.count++;
-
-  // Check if over limit
-  if (record.count > limit) {
-    const retryAfter = Math.ceil((record.resetAt - now) / 1000);
-    c.header('Retry-After', String(retryAfter));
-    c.header('X-RateLimit-Remaining', '0');
-    logger.info('Rate limit exceeded', { ip, category, path: c.req.path });
-    return c.json({ error: 'Too many requests' }, 429);
-  }
-
-  c.header('X-RateLimit-Remaining', String(limit - record.count));
-  await next();
-}
-
-// Cleanup expired rate limit entries every 15 minutes
-setInterval(() => {
-  const now = Date.now();
-  let cleaned = 0;
-
-  for (const [key, record] of rateLimitStore.entries()) {
-    if (now > record.resetAt) {
-      rateLimitStore.delete(key);
-      cleaned++;
-    }
-  }
-
-  // LRU eviction if still over limit
-  evictOldestEntries(rateLimitStore, RATE_LIMIT_MAX_ENTRIES, (data) => data.resetAt);
-
-  if (cleaned > 0) {
-    logger.debug('Rate limit cleanup completed', { removedEntries: cleaned });
-  }
-}, 15 * 60 * 1000);
 
 // ==== ACCOUNT LOCKOUT ====
 const loginAttemptStore = new Map(); // email -> { attempts, lockedUntil }
@@ -549,6 +437,7 @@ const db = {
   updateUser: (query, update) => databaseManager.updateUser(currentDbConfig.dbType, currentDbConfig.db, currentDbConfig.connectionString, query, update),
   findAuth: (query) => databaseManager.findAuth(currentDbConfig.dbType, currentDbConfig.db, currentDbConfig.connectionString, query),
   insertAuth: (authData) => databaseManager.insertAuth(currentDbConfig.dbType, currentDbConfig.db, currentDbConfig.connectionString, authData),
+  updateAuth: (query, update) => databaseManager.updateAuth(currentDbConfig.dbType, currentDbConfig.db, currentDbConfig.connectionString, query, update),
   findWebhookEvent: (eventId) => databaseManager.findWebhookEvent(currentDbConfig.dbType, currentDbConfig.db, currentDbConfig.connectionString, eventId),
   insertWebhookEvent: (eventId, eventType, processedAt) => databaseManager.insertWebhookEvent(currentDbConfig.dbType, currentDbConfig.db, currentDbConfig.connectionString, eventId, eventType, processedAt),
   executeQuery: (queryObject) => databaseManager.executeQuery(currentDbConfig.dbType, currentDbConfig.db, currentDbConfig.connectionString, queryObject)
@@ -574,9 +463,6 @@ app.use('*', cors({
   credentials: true
 }));
 
-// Rate limiting middleware
-app.use('*', rateLimitMiddleware);
-
 // Apache Common Log Format middleware
 app.use('*', async (c, next) => {
   const start = Date.now();
@@ -594,11 +480,11 @@ app.use('*', async (c, next) => {
 app.use('*', secureHeaders({
   contentSecurityPolicy: {
     defaultSrc: ["'self'"],
-    scriptSrc: ["'self'", "'unsafe-inline'", "https://aob.bixbyapps.com", "https://static.cloudflareinsights.com"],
+    scriptSrc: ["'self'", "'unsafe-inline'"],
     styleSrc: ["'self'", "'unsafe-inline'"],
     imgSrc: ["'self'", "https:"],
     fontSrc: ["'self'"],
-    connectSrc: ["'self'", "https://aob.bixbyapps.com"],
+    connectSrc: ["'self'"],
     frameAncestors: ["'none'"]
   },
   strictTransportSecurity: !isProd() ? false : 'max-age=31536000; includeSubDomains; preload',
@@ -624,32 +510,61 @@ app.use('*', async (c, next) => {
 
 const tokenExpirationDays = 30;
 
+const scryptAsync = promisify(crypto.scrypt);
+const SCRYPT_KEYLEN = 64;
+const SCRYPT_SALTLEN = 16;
+
 /**
- * Hash password using bcrypt with 10 salt rounds
+ * Hash password using node:crypto scrypt
  *
- * Generates salt and hashes password for secure storage. Uses bcrypt's
- * automatic salt generation.
+ * Format: `scrypt$<base64url salt>$<base64url key>`. New hashes always use
+ * scrypt; legacy bcrypt hashes (prefix `$2`) are verified via the dispatch
+ * in verifyPassword but never created.
  *
  * @async
  * @param {string} password - Plain text password to hash
- * @returns {Promise<string>} Bcrypt hashed password
- * @throws {Error} If bcrypt hashing fails
+ * @returns {Promise<string>} Scrypt hash string
  */
 async function hashPassword(password) {
-  const salt = await bcrypt.genSalt(10);
-  return await bcrypt.hash(password, salt);
+  const salt = crypto.randomBytes(SCRYPT_SALTLEN);
+  const key = await scryptAsync(password, salt, SCRYPT_KEYLEN);
+  return `scrypt$${salt.toString('base64url')}$${key.toString('base64url')}`;
 }
 
 /**
- * Verify password against bcrypt hash using timing-safe comparison
+ * Verify password against stored hash (scrypt or legacy bcrypt)
+ *
+ * Dispatches on stored hash prefix: `scrypt$` → native scrypt verify;
+ * `$2` → bcryptjs (legacy users predating the scrypt migration).
  *
  * @async
  * @param {string} password - Plain text password to verify
- * @param {string} hash - Bcrypt hash to compare against
- * @returns {Promise<boolean>} True if password matches hash
+ * @param {string} stored - Stored hash (scrypt or bcrypt format)
+ * @returns {Promise<boolean>} True if password matches stored hash
  */
-async function verifyPassword(password, hash) {
-  return await bcrypt.compare(password, hash);
+async function verifyPassword(password, stored) {
+  if (typeof stored !== 'string') return false;
+  if (stored.startsWith('scrypt$')) {
+    const [, saltB64, keyB64] = stored.split('$');
+    const salt = Buffer.from(saltB64, 'base64url');
+    const expected = Buffer.from(keyB64, 'base64url');
+    const candidate = await scryptAsync(password, salt, SCRYPT_KEYLEN);
+    return expected.length === candidate.length && crypto.timingSafeEqual(expected, candidate);
+  }
+  if (stored.startsWith('$2')) {
+    return await legacyBcryptCompare(password, stored);
+  }
+  return false;
+}
+
+/**
+ * Whether a stored hash should be migrated to scrypt on next successful login
+ *
+ * @param {string} stored - Stored hash
+ * @returns {boolean} True if the hash is in legacy bcrypt format
+ */
+function needsRehash(stored) {
+  return typeof stored === 'string' && !stored.startsWith('scrypt$');
 }
 
 /**
@@ -659,6 +574,56 @@ async function verifyPassword(password, hash) {
  */
 function tokenExpireTimestamp(){
   return Math.floor(Date.now() / 1000) + tokenExpirationDays * 24 * 60 * 60; // 30 days from now
+}
+
+/**
+ * Sign an HS256 JWT using node:crypto HMAC-SHA256
+ *
+ * Produces a token byte-compatible with jsonwebtoken: header
+ * {"alg":"HS256","typ":"JWT"} followed by the payload, joined and signed
+ * over `base64url(header).base64url(payload)`.
+ *
+ * @param {Object} payload - Payload to encode (must include exp)
+ * @param {string} secret - HMAC signing secret
+ * @returns {string} Compact JWT string
+ */
+function jwtSign(payload, secret) {
+  const head = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', secret).update(`${head}.${body}`).digest('base64url');
+  return `${head}.${body}.${sig}`;
+}
+
+/**
+ * Verify an HS256 JWT and return its payload
+ *
+ * Compatible with tokens issued by jsonwebtoken (same algorithm, same secret).
+ * Throws an Error with name === 'TokenExpiredError' for expired tokens, or a
+ * generic Error for malformed/invalid signatures.
+ *
+ * @param {string} token - JWT string to verify
+ * @param {string} secret - HMAC verification secret
+ * @returns {Object} Decoded payload
+ * @throws {Error} If token is malformed, signature invalid, or expired
+ */
+function jwtVerify(token, secret) {
+  const parts = token.split('.');
+  if (parts.length !== 3) throw new Error('Invalid token');
+  const [head, body, sig] = parts;
+  if (!head || !body || !sig) throw new Error('Invalid token');
+  const expected = crypto.createHmac('sha256', secret).update(`${head}.${body}`).digest('base64url');
+  const sigBuf = Buffer.from(sig);
+  const expBuf = Buffer.from(expected);
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+    throw new Error('Invalid signature');
+  }
+  const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
+  if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) {
+    const err = new Error('Token expired');
+    err.name = 'TokenExpiredError';
+    throw err;
+  }
+  return payload;
 }
 
 /**
@@ -681,10 +646,7 @@ async function generateToken(userID) {
     const exp = tokenExpireTimestamp();
     const payload = { userID, exp };
 
-    return jwt.sign(payload, JWT_SECRET, {
-      algorithm: 'HS256',
-      header: { alg: "HS256", typ: "JWT" }
-    });
+    return jwtSign(payload, JWT_SECRET);
   } catch (error) {
     logger.error('Token generation error', { error: error.message });
     throw error;
@@ -716,7 +678,7 @@ async function authMiddleware(c, next) {
   }
 
   try {
-    const payload = jwt.verify(token, JWT_SECRET, { algorithms: ["HS256"] });
+    const payload = jwtVerify(token, JWT_SECRET);
     // Normalize userID to string for consistent Map key usage (CSRF, sessions)
     const normalizedUserID = String(payload.userID);
     c.set('userID', normalizedUserID);
@@ -852,6 +814,56 @@ function setAuthCookies(c, userID, jwtToken) {
 }
 
 // ==== STRIPE WEBHOOK (raw body needed) ====
+
+/**
+ * Resolve a Stripe customer ID to a normalized lowercase email.
+ *
+ * @param {string} stripeID - Stripe customer ID
+ * @returns {Promise<string|null>} Normalized email, or null if missing
+ */
+async function resolveCustomerEmail(stripeID) {
+  const customer = await stripe.customers.retrieve(stripeID);
+  if (!customer?.email) {
+    logger.warn('Webhook: Customer has no email', { stripeID });
+    return null;
+  }
+  return customer.email.toLowerCase();
+}
+
+/**
+ * Build the canonical user.subscription patch from a Stripe customer ID
+ * and a Stripe subscription object.
+ *
+ * @param {string} stripeID - Stripe customer ID
+ * @param {object} stripeSub - Stripe subscription object
+ * @returns {{stripeID: string, expires: number, status: string}}
+ */
+function buildSubscriptionPatch(stripeID, stripeSub) {
+  return {
+    stripeID,
+    expires: stripeSub.current_period_end,
+    status: stripeSub.status
+  };
+}
+
+/**
+ * Apply a $set patch to the user identified by email. Returns false if no
+ * matching user is found (silent no-op so Stripe will not retry).
+ *
+ * @param {string} email - Normalized email
+ * @param {object} $set - MongoDB-style $set fields
+ * @returns {Promise<boolean>} True if a user was patched
+ */
+async function applyUserPatch(email, $set) {
+  const user = await db.findUser({ email });
+  if (!user) {
+    logger.warn('Webhook: No user found for email', { email });
+    return false;
+  }
+  await db.updateUser({ email }, { $set });
+  return true;
+}
+
 app.post("/api/payment", async (c) => {
   logger.info('Payment webhook received');
 
@@ -881,85 +893,56 @@ app.post("/api/payment", async (c) => {
 
     const eventObject = event.data.object;
 
-    // Handle subscription lifecycle events
     if (["customer.subscription.deleted", "customer.subscription.updated", "customer.subscription.created"].includes(event.type)) {
       const { customer: stripeID, current_period_end, status } = eventObject;
       if (!stripeID) {
         logger.error('Webhook missing customer ID', { type: event.type });
         return c.body(null, 400);
       }
-
-      const customer = await stripe.customers.retrieve(stripeID);
-      if (!customer || !customer.email) {
-        logger.error('Webhook: Customer has no email', { stripeID });
-        return c.body(null, 400);
-      }
-
-      const customerEmail = customer.email.toLowerCase();
-      const user = await db.findUser({ email: customerEmail });
-      if (user) {
-        await db.updateUser({ email: customerEmail }, {
-          $set: { subscription: { stripeID, expires: current_period_end, status } }
-        });
-        logger.info('Subscription updated', { type: event.type, email: customerEmail, status });
-      } else {
-        logger.warn('Webhook: No user found for email', { email: customerEmail });
-      }
+      const email = await resolveCustomerEmail(stripeID);
+      if (!email) return c.body(null, 400);
+      const ok = await applyUserPatch(email, { subscription: { stripeID, expires: current_period_end, status } });
+      if (ok) logger.info('Subscription updated', { type: event.type, email, status });
     }
 
-    // Handle checkout session completed (initial subscription)
     if (event.type === "checkout.session.completed") {
       const { customer: stripeID, customer_email, subscription: subscriptionId } = eventObject;
       if (subscriptionId && stripeID) {
-        const subscriptionPromise = stripe.subscriptions.retrieve(subscriptionId);
-        const customerPromise = !customer_email ? stripe.customers.retrieve(stripeID) : null;
-        const [subscription, fetchedCustomer] = await Promise.all([subscriptionPromise, customerPromise]);
-        const customerEmail = (customer_email || fetchedCustomer.email).toLowerCase();
-        const user = await db.findUser({ email: customerEmail });
-        if (user) {
-          await db.updateUser({ email: customerEmail }, {
-            $set: { subscription: { stripeID, expires: subscription.current_period_end, status: subscription.status } }
-          });
-          logger.info('Checkout completed', { email: customerEmail, status: subscription.status });
+        const [subscription, email] = await Promise.all([
+          stripe.subscriptions.retrieve(subscriptionId),
+          customer_email ? Promise.resolve(customer_email.toLowerCase()) : resolveCustomerEmail(stripeID)
+        ]);
+        if (email) {
+          const ok = await applyUserPatch(email, { subscription: buildSubscriptionPatch(stripeID, subscription) });
+          if (ok) logger.info('Checkout completed', { email, status: subscription.status });
         }
       }
     }
 
-    // Handle invoice paid (recurring payment success)
     if (event.type === "invoice.paid") {
       const { customer: stripeID, subscription: subscriptionId } = eventObject;
       if (subscriptionId && stripeID) {
-        const [subscription, customer] = await Promise.all([
+        const [subscription, email] = await Promise.all([
           stripe.subscriptions.retrieve(subscriptionId),
-          stripe.customers.retrieve(stripeID)
+          resolveCustomerEmail(stripeID)
         ]);
-        if (customer?.email) {
-          const customerEmail = customer.email.toLowerCase();
-          const user = await db.findUser({ email: customerEmail });
-          if (user) {
-            await db.updateUser({ email: customerEmail }, {
-              $set: { subscription: { stripeID, expires: subscription.current_period_end, status: subscription.status } }
-            });
-            logger.info('Invoice paid', { email: customerEmail });
-          }
+        if (email) {
+          const ok = await applyUserPatch(email, { subscription: buildSubscriptionPatch(stripeID, subscription) });
+          if (ok) logger.info('Invoice paid', { email });
         }
       }
     }
 
-    // Handle invoice payment failed
     if (event.type === "invoice.payment_failed") {
       const { customer: stripeID } = eventObject;
       if (stripeID) {
-        const customer = await stripe.customers.retrieve(stripeID);
-        if (customer?.email) {
-          const customerEmail = customer.email.toLowerCase();
-          const user = await db.findUser({ email: customerEmail });
-          if (user) {
-            await db.updateUser({ email: customerEmail }, {
-              $set: { 'subscription.paymentFailed': true, 'subscription.paymentFailedAt': Date.now() }
-            });
-            logger.warn('Invoice payment failed', { email: customerEmail });
-          }
+        const email = await resolveCustomerEmail(stripeID);
+        if (email) {
+          const ok = await applyUserPatch(email, {
+            'subscription.paymentFailed': true,
+            'subscription.paymentFailedAt': Date.now()
+          });
+          if (ok) logger.warn('Invoice payment failed', { email });
         }
       }
     }
@@ -1109,6 +1092,17 @@ app.post("/api/signin", async (c) => {
       logger.debug('Password verification failed');
       recordFailedLogin(email);
       return c.json({ error: "Invalid credentials" }, 401);
+    }
+
+    // Lazy migrate legacy bcrypt hash to scrypt (best-effort, never blocks login)
+    if (needsRehash(auth.password)) {
+      try {
+        const newHash = await hashPassword(password);
+        await db.updateAuth({ email }, { password: newHash });
+        logger.debug('Password hash migrated to scrypt');
+      } catch (e) {
+        logger.warn('Password rehash failed', { error: e.message });
+      }
     }
 
     // Get user

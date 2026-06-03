@@ -12,8 +12,6 @@ dist
 dist-ssr
 *.local
 
-deno.lock
-
 # Environment variables
 .env
 .env.local
@@ -23,6 +21,9 @@ deno.lock
 backend/.env
 
 .claude/
+.agent-browser/
+.playwright-mcp/
+deno.lock
 
 # Editor directories and files
 .vscode/*
@@ -34,9 +35,6 @@ backend/.env
 *.njsproj
 *.sln
 *.sw?
-
-# Railway
-railway.json
 
 # Database files
 *.db

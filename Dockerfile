@@ -1,49 +1,41 @@
-# Multi-stage build for smaller production image
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
+
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 COPY backend/package*.json ./backend/
 
-# Install dependencies
 RUN npm install && cd backend && npm install
 
-# Analytics env vars for build-time access
-ARG VITE_ANALYTICS_SRC
-ARG VITE_ANALYTICS_ID
-ENV VITE_ANALYTICS_SRC=$VITE_ANALYTICS_SRC
-ENV VITE_ANALYTICS_ID=$VITE_ANALYTICS_ID
-
-# Copy source code
 COPY . .
 
-# Build frontend
 RUN npm run build
 
-# Production stage
-FROM node:22-alpine
+FROM node:24-alpine
+
+RUN apk add --no-cache libstdc++
 
 WORKDIR /app
 
-# Set production environment
 ENV NODE_ENV=production
 
-# Copy built frontend
 COPY --from=builder /app/dist ./dist
-
-# Copy backend
 COPY --from=builder /app/backend ./backend
 
-# Copy root node_modules (workspaces hoist here)
-COPY --from=builder /app/node_modules ./node_modules
+RUN apk add --no-cache --virtual .build-deps python3 make g++ \
+    && cd backend && npm install --omit=dev \
+    && apk del .build-deps
 
-# Copy package files
-COPY package*.json ./
+RUN chown -R node:node /app/backend
 
-# Expose port
+USER node
+
 EXPOSE 8000
 
-# Run server
-CMD ["node", "--experimental-sqlite", "backend/server.js"]
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:8000/api/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
+WORKDIR /app/backend
+CMD ["node", "server.js"]
