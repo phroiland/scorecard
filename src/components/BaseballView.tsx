@@ -36,13 +36,17 @@ interface Team {
 }
 
 // Brand colors — used only for SVG and conditional active states
-const NAVY  = '#1B2838';
-const RED   = '#8B2500';
-const GOLD  = '#C4A265';
-const CREAM = '#F5E6C8';
+const NAVY   = '#0a1c3b';
+const ORANGE = '#F0962A';
+const GOLD   = '#f4b41a';
+const WHITE  = '#ffffff';
+const INK    = '#0c1626';
+const PAPER  = '#f5f7fb';
+const LINE   = '#dde3ee';
 
 const FONT_HEAD = "'Playfair Display', Georgia, serif";
 const FONT_MONO = "'Special Elite', 'Courier New', monospace";
+const FONT_ARCH = "'Archivo', 'Arial Narrow', sans-serif";
 
 const INITIAL_ATBAT: AtBat = { result: '', first: false, second: false, third: false, home: false, out: 0 };
 
@@ -234,7 +238,7 @@ export default function BaseballView() {
                       fontFamily: FONT_HEAD,
                       fontWeight: activeTeam === idx ? 800 : 500,
                       background: activeTeam === idx ? NAVY : 'transparent',
-                      color: activeTeam === idx ? CREAM : '#5A3E28',
+                      color: activeTeam === idx ? WHITE : '#5c6b82',
                       letterSpacing: '0.05em',
                     }}
                     onClick={() => setActiveTeam(idx)}
@@ -244,7 +248,7 @@ export default function BaseballView() {
                 ))}
               </div>
               <Button variant="outline" size="sm"
-                style={{ fontFamily: FONT_HEAD, borderColor: GOLD, color: NAVY }}
+                style={{ fontFamily: FONT_ARCH, borderColor: LINE, color: NAVY, borderRadius: '50px' }}
                 onClick={() => setMobileView('stats')}>
                 Stats
               </Button>
@@ -258,8 +262,8 @@ export default function BaseballView() {
                   className="w-7 h-7 rounded-full text-xs font-bold transition-colors"
                   style={{
                     fontFamily: FONT_HEAD,
-                    background: mobileInningIdx === i ? NAVY : 'rgba(196,162,101,0.2)',
-                    color: mobileInningIdx === i ? CREAM : '#5A3E28',
+                    background: mobileInningIdx === i ? NAVY : PAPER,
+                    color: mobileInningIdx === i ? WHITE : '#5c6b82',
                   }}
                   onClick={() => setMobileInningIdx(i)}
                 >
@@ -274,24 +278,24 @@ export default function BaseballView() {
               onClick={() => !mobileInningClosed && setDrawerOpen(true)}
             >
               <svg viewBox="0 0 68 56" className="w-full max-w-xs">
-                <path d="M34 4 L56 28 L34 52 L12 28 Z" fill="none" stroke={GOLD} strokeWidth="1.5" />
-                {mobileAb.first  && <line x1="34" y1="52" x2="56" y2="28" stroke={RED} strokeWidth="3" />}
-                {mobileAb.second && <line x1="56" y1="28" x2="34" y2="4"  stroke={RED} strokeWidth="3" />}
-                {mobileAb.third  && <line x1="34" y1="4"  x2="12" y2="28" stroke={RED} strokeWidth="3" />}
+                <path d="M34 4 L56 28 L34 52 L12 28 Z" fill="none" stroke={LINE} strokeWidth="1.5" />
+                {mobileAb.first  && <line x1="34" y1="52" x2="56" y2="28" stroke={ORANGE} strokeWidth="3" />}
+                {mobileAb.second && <line x1="56" y1="28" x2="34" y2="4"  stroke={ORANGE} strokeWidth="3" />}
+                {mobileAb.third  && <line x1="34" y1="4"  x2="12" y2="28" stroke={ORANGE} strokeWidth="3" />}
                 {mobileAb.home && (
                   <>
-                    <line x1="12" y1="28" x2="34" y2="52" stroke={RED} strokeWidth="3" />
-                    <path d="M34 8 L52 28 L34 48 L16 28 Z" fill={RED} fillOpacity="0.15" />
+                    <line x1="12" y1="28" x2="34" y2="52" stroke={ORANGE} strokeWidth="3" />
+                    <path d="M34 8 L52 28 L34 48 L16 28 Z" fill={ORANGE} fillOpacity="0.15" />
                   </>
                 )}
                 <text x="34" y="28" textAnchor="middle" dominantBaseline="central" fontSize="12" fontWeight="bold"
-                  fill={NAVY} style={{ fontFamily: FONT_HEAD }}>
+                  fill={INK} style={{ fontFamily: FONT_MONO }}>
                   {mobileAb.result}
                 </text>
                 {mobileCellIsOut && (
                   <>
-                    <circle cx="57" cy="46" r="8" fill={RED} />
-                    <text x="57" y="46" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill={CREAM}>
+                    <circle cx="57" cy="46" r="8" fill={ORANGE} />
+                    <text x="57" y="46" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill={WHITE}>
                       {getOutNumber(mobilePlayerIdx, mobileInningIdx)}
                     </text>
                   </>
@@ -313,7 +317,7 @@ export default function BaseballView() {
             {/* Bottom nav */}
             <div className="mobile-bar-top flex items-center justify-between px-3 py-3">
               <Button variant="outline" size="sm" disabled={mobilePlayerIdx === 0}
-                style={{ fontFamily: FONT_HEAD, borderColor: GOLD, color: NAVY }}
+                style={{ fontFamily: FONT_ARCH, borderColor: LINE, color: NAVY, borderRadius: '50px' }}
                 onClick={() => setMobilePlayerIdx(p => p - 1)}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Prev
               </Button>
@@ -331,7 +335,7 @@ export default function BaseballView() {
                 </Button>
               </div>
               <Button variant="outline" size="sm" disabled={mobilePlayerIdx === 8}
-                style={{ fontFamily: FONT_HEAD, borderColor: GOLD, color: NAVY }}
+                style={{ fontFamily: FONT_ARCH, borderColor: LINE, color: NAVY, borderRadius: '50px' }}
                 onClick={() => setMobilePlayerIdx(p => p + 1)}>
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -353,7 +357,7 @@ export default function BaseballView() {
                       const wouldExceed = rIsOut && !mobileCellIsOut && mobileInningOuts + rOuts > 3;
                       return (
                         <Button key={r} variant="outline" className="h-10 text-sm"
-                          style={{ fontFamily: FONT_MONO, borderColor: GOLD, color: NAVY }}
+                          style={{ fontFamily: FONT_MONO, borderColor: LINE, color: INK }}
                           disabled={wouldExceed}
                           onClick={() => handleMobileResult(r)}>
                           {r}
@@ -369,21 +373,21 @@ export default function BaseballView() {
                   <Input
                     placeholder="Custom..."
                     className="h-10 text-sm"
-                    style={{ fontFamily: FONT_MONO, borderColor: GOLD }}
+                    style={{ fontFamily: FONT_MONO, borderColor: LINE }}
                     onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                       if (e.key === 'Enter') handleMobileResult(e.currentTarget.value.toUpperCase());
                     }}
                   />
-                  <div className="flex items-center gap-2 pt-2" style={{ borderTop: `1px solid ${GOLD}` }}>
-                    <span className="text-sm" style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}>Bases:</span>
+                  <div className="flex items-center gap-2 pt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                    <span className="text-sm" style={{ fontFamily: FONT_MONO, color: '#5c6b82' }}>Bases:</span>
                     {(['first', 'second', 'third', 'home'] as Base[]).map((base, i) => (
                       <Button key={base} variant={mobileAb[base] ? 'default' : 'outline'} size="sm"
                         className="h-8 w-8 p-0"
                         style={{
                           fontFamily: FONT_HEAD,
-                          background: mobileAb[base] ? RED : 'transparent',
-                          borderColor: mobileAb[base] ? RED : GOLD,
-                          color: mobileAb[base] ? CREAM : NAVY,
+                          background: mobileAb[base] ? ORANGE : 'transparent',
+                          borderColor: mobileAb[base] ? ORANGE : LINE,
+                          color: mobileAb[base] ? WHITE : NAVY,
                         }}
                         onClick={() => toggleBase(mobilePlayerIdx, mobileInningIdx, base)}>
                         {i === 3 ? 'H' : i + 1}
@@ -391,7 +395,7 @@ export default function BaseballView() {
                     ))}
                   </div>
                   <Button variant="ghost" className="w-full"
-                    style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}
+                    style={{ fontFamily: FONT_MONO, color: '#5c6b82' }}
                     onClick={() => handleMobileResult('')}>
                     Clear
                   </Button>
@@ -404,7 +408,7 @@ export default function BaseballView() {
           <div className="flex flex-col flex-1 overflow-hidden">
             <div className="mobile-bar flex items-center justify-between px-3 py-2">
               <Button variant="ghost" size="sm"
-                style={{ fontFamily: FONT_HEAD, color: NAVY }}
+                style={{ fontFamily: FONT_ARCH, color: NAVY }}
                 onClick={() => setMobileView('card')}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
@@ -416,7 +420,7 @@ export default function BaseballView() {
                       fontFamily: FONT_HEAD,
                       fontWeight: activeTeam === idx ? 800 : 500,
                       background: activeTeam === idx ? NAVY : 'transparent',
-                      color: activeTeam === idx ? CREAM : '#5A3E28',
+                      color: activeTeam === idx ? WHITE : '#5c6b82',
                     }}
                     onClick={() => setActiveTeam(idx)}>
                     {team.name}
@@ -424,7 +428,7 @@ export default function BaseballView() {
                 ))}
               </div>
               <Button variant="outline" size="sm"
-                style={{ borderColor: GOLD, color: NAVY }}
+                style={{ borderColor: LINE, color: NAVY, borderRadius: '50px' }}
                 onClick={resetScorecard}>
                 <RotateCcw className="h-4 w-4" />
               </Button>
@@ -491,7 +495,7 @@ export default function BaseballView() {
                   <div key={idx}
                     className="cursor-pointer px-1 pb-1 transition-all flex items-center gap-1"
                     style={{
-                      borderBottom: activeTeam === idx ? `3px solid ${GOLD}` : '3px solid transparent',
+                      borderBottom: activeTeam === idx ? `3px solid ${ORANGE}` : '3px solid transparent',
                       opacity: activeTeam === idx ? 1 : 0.5,
                     }}
                     onClick={() => setActiveTeam(idx)}>
@@ -501,14 +505,14 @@ export default function BaseballView() {
                       onChange={(e) => updateTeamName(idx, e.target.value.toUpperCase())}
                       onClick={(e) => { setActiveTeam(idx); e.stopPropagation(); }}
                       className="h-8 w-28 text-center"
-                      style={{ fontFamily: FONT_HEAD, fontWeight: 800, fontSize: '14px', letterSpacing: '0.08em' }}
+                      style={{ fontFamily: FONT_ARCH, fontWeight: 900, fontSize: '14px', letterSpacing: '0.02em' }}
                       maxLength={12}
                     />
                   </div>
                 ))}
               </div>
               <Button variant="outline" size="sm" onClick={resetScorecard}
-                style={{ fontFamily: FONT_HEAD, borderColor: GOLD, color: CREAM, background: 'transparent' }}>
+                style={{ fontFamily: FONT_ARCH, borderColor: 'rgba(255,255,255,.3)', color: WHITE, background: 'transparent' }}>
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Reset
               </Button>
@@ -564,24 +568,24 @@ export default function BaseballView() {
                             <Popover open={openPopover === cellKey} onOpenChange={(open) => !inningClosed && setOpenPopover(open ? cellKey : null)}>
                               <PopoverTrigger render={<div className={`w-full h-14 transition-colors ${inningClosed ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:bg-[rgba(196,162,101,0.2)]'}`} />}>
                                 <svg viewBox="0 0 68 56" className="w-full h-full">
-                                  <path d="M34 4 L56 28 L34 52 L12 28 Z" fill="none" stroke={GOLD} strokeWidth="1.5" strokeOpacity="0.6" />
-                                  {ab.first  && <line x1="34" y1="52" x2="56" y2="28" stroke={RED} strokeWidth="3" />}
-                                  {ab.second && <line x1="56" y1="28" x2="34" y2="4"  stroke={RED} strokeWidth="3" />}
-                                  {ab.third  && <line x1="34" y1="4"  x2="12" y2="28" stroke={RED} strokeWidth="3" />}
+                                  <path d="M34 4 L56 28 L34 52 L12 28 Z" fill="none" stroke={LINE} strokeWidth="1.5" />
+                                  {ab.first  && <line x1="34" y1="52" x2="56" y2="28" stroke={ORANGE} strokeWidth="3" />}
+                                  {ab.second && <line x1="56" y1="28" x2="34" y2="4"  stroke={ORANGE} strokeWidth="3" />}
+                                  {ab.third  && <line x1="34" y1="4"  x2="12" y2="28" stroke={ORANGE} strokeWidth="3" />}
                                   {ab.home && (
                                     <>
-                                      <line x1="12" y1="28" x2="34" y2="52" stroke={RED} strokeWidth="3" />
-                                      <path d="M34 8 L52 28 L34 48 L16 28 Z" fill={RED} fillOpacity="0.12" />
+                                      <line x1="12" y1="28" x2="34" y2="52" stroke={ORANGE} strokeWidth="3" />
+                                      <path d="M34 8 L52 28 L34 48 L16 28 Z" fill={ORANGE} fillOpacity="0.12" />
                                     </>
                                   )}
                                   <text x="34" y="28" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold"
-                                    fill={NAVY} style={{ fontFamily: FONT_HEAD }}>
+                                    fill={INK} style={{ fontFamily: FONT_MONO }}>
                                     {ab.result}
                                   </text>
                                   {cellIsOut && (
                                     <>
-                                      <circle cx="57" cy="46" r="8" fill={RED} />
-                                      <text x="57" y="46" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill={CREAM}>
+                                      <circle cx="57" cy="46" r="8" fill={ORANGE} />
+                                      <text x="57" y="46" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill={WHITE}>
                                         {getOutNumber(pIdx, iIdx)}
                                       </text>
                                     </>
@@ -599,7 +603,7 @@ export default function BaseballView() {
                                       return (
                                         <Button key={r} variant="outline" size="sm"
                                           className="h-7 text-xs"
-                                          style={{ fontFamily: FONT_MONO, borderColor: GOLD, color: NAVY }}
+                                          style={{ fontFamily: FONT_MONO, borderColor: LINE, color: INK }}
                                           disabled={wouldExceed}
                                           onClick={() => updateAtBat(pIdx, iIdx, r)}>
                                           {r}
@@ -612,21 +616,21 @@ export default function BaseballView() {
                                   )}
                                   <div className="flex gap-1 mt-2">
                                     <Input placeholder="Custom..." className="h-7 text-xs"
-                                      style={{ fontFamily: FONT_MONO, borderColor: GOLD }}
+                                      style={{ fontFamily: FONT_MONO, borderColor: LINE }}
                                       onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                                         if (e.key === 'Enter') updateAtBat(pIdx, iIdx, e.currentTarget.value.toUpperCase());
                                       }} />
                                   </div>
-                                  <div className="flex gap-2 pt-2" style={{ borderTop: `1px solid ${GOLD}` }}>
-                                    <p className="text-xs" style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}>Bases:</p>
+                                  <div className="flex gap-2 pt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                                    <p className="text-xs" style={{ fontFamily: FONT_MONO, color: '#5c6b82' }}>Bases:</p>
                                     {(['first', 'second', 'third', 'home'] as Base[]).map((base, i) => (
                                       <Button key={base} variant={ab[base] ? 'default' : 'outline'} size="sm"
                                         className="h-6 w-6 p-0 text-xs"
                                         style={{
                                           fontFamily: FONT_HEAD,
-                                          background: ab[base] ? RED : 'transparent',
-                                          borderColor: ab[base] ? RED : GOLD,
-                                          color: ab[base] ? CREAM : NAVY,
+                                          background: ab[base] ? ORANGE : 'transparent',
+                          borderColor: ab[base] ? ORANGE : LINE,
+                          color: ab[base] ? WHITE : NAVY,
                                         }}
                                         onClick={() => toggleBase(pIdx, iIdx, base)}>
                                         {i === 3 ? 'H' : i + 1}
@@ -634,7 +638,7 @@ export default function BaseballView() {
                                     ))}
                                   </div>
                                   <Button variant="ghost" size="sm" className="w-full h-6 text-xs"
-                                    style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}
+                                    style={{ fontFamily: FONT_MONO, color: '#5c6b82' }}
                                     onClick={() => updateAtBat(pIdx, iIdx, '')}>
                                     Clear
                                   </Button>
