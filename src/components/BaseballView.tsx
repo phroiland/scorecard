@@ -47,22 +47,18 @@ interface Team {
   atBats: AtBat[][];
 }
 
-const POSITIONS: Record<number, string> = {
-  1: 'P', 2: 'C', 3: '1B', 4: '2B', 5: '3B', 6: 'SS', 7: 'LF', 8: 'CF', 9: 'RF'
-};
+// Brand palette
+const NAVY   = '#1B2838';
+const RED    = '#8B2500';
+const GOLD   = '#C4A265';
+const CREAM  = '#F5E6C8';
+const PARCH  = 'rgba(245,230,200,0.18)';
+const PARCH2 = 'rgba(245,230,200,0.35)';
 
-const INITIAL_PLAYERS: Player[] = [
-  { num: '', name: '', pos: '' },
-  { num: '', name: '', pos: '' },
-  { num: '', name: '', pos: '' },
-  { num: '', name: '', pos: '' },
-  { num: '', name: '', pos: '' },
-  { num: '', name: '', pos: '' },
-  { num: '', name: '', pos: '' },
-  { num: '', name: '', pos: '' },
-  { num: '', name: '', pos: '' },
-];
+const FONT_HEAD = "'Playfair Display', Georgia, 'Times New Roman', serif";
+const FONT_MONO = "'Special Elite', 'Courier New', monospace";
 
+const INITIAL_PLAYERS: Player[] = Array(9).fill(null).map(() => ({ num: '', name: '', pos: '' }));
 const INITIAL_ATBAT: AtBat = { result: '', first: false, second: false, third: false, home: false, out: 0 };
 
 /**
@@ -260,19 +256,27 @@ export default function BaseballView() {
         {mobileView === 'card' ? (
           <>
             {/* Top bar: team tabs + stats button */}
-            <div className="flex items-center justify-between px-3 py-2 border-b">
+            <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: `1px solid ${GOLD}` }}>
               <div className="flex items-center gap-1">
                 {teams.map((team, idx) => (
                   <button
                     key={idx}
-                    className={`px-2 py-1 text-sm font-mono rounded transition-colors ${activeTeam === idx ? 'bg-foreground text-background font-bold' : 'text-muted-foreground'}`}
+                    className="px-2 py-1 text-sm rounded transition-colors"
+                    style={{
+                      fontFamily: FONT_HEAD,
+                      fontWeight: activeTeam === idx ? 800 : 500,
+                      background: activeTeam === idx ? NAVY : 'transparent',
+                      color: activeTeam === idx ? CREAM : '#5A3E28',
+                      letterSpacing: '0.05em',
+                    }}
                     onClick={() => setActiveTeam(idx)}
                   >
                     {idx === 0 ? '⚾' : '🏟️'} {team.name}
                   </button>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={() => setMobileView('stats')}>
+              <Button variant="outline" size="sm" onClick={() => setMobileView('stats')}
+                style={{ fontFamily: FONT_HEAD, borderColor: GOLD, color: NAVY }}>
                 Stats
               </Button>
             </div>
@@ -282,7 +286,12 @@ export default function BaseballView() {
               {innings.map((_, i) => (
                 <button
                   key={i}
-                  className={`w-7 h-7 rounded-full text-xs font-bold transition-colors ${mobileInningIdx === i ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground'}`}
+                  className="w-7 h-7 rounded-full text-xs font-bold transition-colors"
+                  style={{
+                    fontFamily: FONT_HEAD,
+                    background: mobileInningIdx === i ? NAVY : 'rgba(196,162,101,0.2)',
+                    color: mobileInningIdx === i ? CREAM : '#5A3E28',
+                  }}
                   onClick={() => setMobileInningIdx(i)}
                 >
                   {i + 1}
@@ -299,32 +308,32 @@ export default function BaseballView() {
                 <path
                   d="M34 4 L56 28 L34 52 L12 28 Z"
                   fill="none"
-                  stroke="currentColor"
+                  stroke={GOLD}
                   strokeWidth="1.5"
-                  className="text-foreground/40"
                 />
                 {mobileAb.first && (
-                  <line x1="34" y1="52" x2="56" y2="28" stroke="currentColor" strokeWidth="3" className="text-foreground" />
+                  <line x1="34" y1="52" x2="56" y2="28" stroke={RED} strokeWidth="3" />
                 )}
                 {mobileAb.second && (
-                  <line x1="56" y1="28" x2="34" y2="4" stroke="currentColor" strokeWidth="3" className="text-foreground" />
+                  <line x1="56" y1="28" x2="34" y2="4" stroke={RED} strokeWidth="3" />
                 )}
                 {mobileAb.third && (
-                  <line x1="34" y1="4" x2="12" y2="28" stroke="currentColor" strokeWidth="3" className="text-foreground" />
+                  <line x1="34" y1="4" x2="12" y2="28" stroke={RED} strokeWidth="3" />
                 )}
                 {mobileAb.home && (
                   <>
-                    <line x1="12" y1="28" x2="34" y2="52" stroke="currentColor" strokeWidth="3" className="text-foreground" />
-                    <path d="M34 8 L52 28 L34 48 L16 28 Z" fill="currentColor" className="text-foreground/20" />
+                    <line x1="12" y1="28" x2="34" y2="52" stroke={RED} strokeWidth="3" />
+                    <path d="M34 8 L52 28 L34 48 L16 28 Z" fill={RED} fillOpacity="0.15" />
                   </>
                 )}
-                <text x="34" y="28" textAnchor="middle" dominantBaseline="central" fontSize="12" fontWeight="bold" fill="currentColor">
+                <text x="34" y="28" textAnchor="middle" dominantBaseline="central" fontSize="12" fontWeight="bold"
+                  fill={NAVY} style={{ fontFamily: FONT_HEAD }}>
                   {mobileAb.result}
                 </text>
                 {mobileCellIsOut && (
                   <>
-                    <circle cx="57" cy="46" r="8" fill="currentColor" className="text-foreground" />
-                    <text x="57" y="46" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill="white">
+                    <circle cx="57" cy="46" r="8" fill={RED} />
+                    <text x="57" y="46" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill={CREAM}>
                       {getOutNumber(mobilePlayerIdx, mobileInningIdx)}
                     </text>
                   </>
@@ -334,22 +343,23 @@ export default function BaseballView() {
 
             {/* Player info */}
             <div className="px-4 py-2 text-center">
-              <p className="font-mono font-bold text-lg">
+              <p className="font-bold text-lg" style={{ fontFamily: FONT_HEAD, color: NAVY, letterSpacing: '0.04em' }}>
                 {players[mobilePlayerIdx].num ? `#${players[mobilePlayerIdx].num} ` : ''}
                 {players[mobilePlayerIdx].name || `Batter ${mobilePlayerIdx + 1}`}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm" style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}>
                 {players[mobilePlayerIdx].pos || '--'} · Batting {mobilePlayerIdx + 1} of 9
               </p>
             </div>
 
             {/* Bottom nav: prev/next batter + inning arrows */}
-            <div className="flex items-center justify-between px-3 py-3 border-t">
+            <div className="flex items-center justify-between px-3 py-3" style={{ borderTop: `1px solid ${GOLD}` }}>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={mobilePlayerIdx === 0}
                 onClick={() => setMobilePlayerIdx(p => p - 1)}
+                style={{ fontFamily: FONT_HEAD, borderColor: GOLD, color: NAVY }}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" /> Prev
               </Button>
@@ -363,7 +373,9 @@ export default function BaseballView() {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm font-mono font-bold w-12 text-center">Inn {mobileInningIdx + 1}</span>
+                <span className="text-sm font-bold w-12 text-center" style={{ fontFamily: FONT_HEAD, color: NAVY, letterSpacing: '0.04em' }}>
+                  Inn {mobileInningIdx + 1}
+                </span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -379,6 +391,7 @@ export default function BaseballView() {
                 size="sm"
                 disabled={mobilePlayerIdx === 8}
                 onClick={() => setMobilePlayerIdx(p => p + 1)}
+                style={{ fontFamily: FONT_HEAD, borderColor: GOLD, color: NAVY }}
               >
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -388,7 +401,7 @@ export default function BaseballView() {
             <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
               <DrawerContent>
                 <DrawerHeader>
-                  <DrawerTitle>
+                  <DrawerTitle style={{ fontFamily: FONT_HEAD, color: NAVY, letterSpacing: '0.04em' }}>
                     {players[mobilePlayerIdx].name || `Batter ${mobilePlayerIdx + 1}`} — Inning {mobileInningIdx + 1}
                   </DrawerTitle>
                 </DrawerHeader>
@@ -402,7 +415,8 @@ export default function BaseballView() {
                         <Button
                           key={r}
                           variant="outline"
-                          className="h-10 text-sm font-mono"
+                          className="h-10 text-sm"
+                          style={{ fontFamily: FONT_MONO, borderColor: GOLD, color: NAVY }}
                           disabled={wouldExceed}
                           onClick={() => handleMobileResult(r)}
                         >
@@ -412,25 +426,34 @@ export default function BaseballView() {
                     })}
                   </div>
                   {mobileInningOuts >= 3 && !mobileCellIsOut && (
-                    <p className="text-xs text-destructive font-semibold text-center">3 outs recorded in inning {mobileInningIdx + 1}</p>
+                    <p className="text-xs font-semibold text-center" style={{ fontFamily: FONT_MONO, color: RED }}>
+                      3 outs recorded in inning {mobileInningIdx + 1}
+                    </p>
                   )}
                   <Input
                     placeholder="Custom..."
-                    className="h-10 text-sm font-mono"
+                    className="h-10 text-sm"
+                    style={{ fontFamily: FONT_MONO, borderColor: GOLD }}
                     onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                       if (e.key === 'Enter') {
                         handleMobileResult(e.currentTarget.value.toUpperCase());
                       }
                     }}
                   />
-                  <div className="flex items-center gap-2 pt-2 border-t">
-                    <span className="text-sm text-muted-foreground">Bases:</span>
+                  <div className="flex items-center gap-2 pt-2" style={{ borderTop: `1px solid ${GOLD}` }}>
+                    <span className="text-sm" style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}>Bases:</span>
                     {(['first', 'second', 'third', 'home'] as Base[]).map((base, i) => (
                       <Button
                         key={base}
                         variant={mobileAb[base] ? 'default' : 'outline'}
                         size="sm"
                         className="h-8 w-8 p-0"
+                        style={{
+                          fontFamily: FONT_HEAD,
+                          background: mobileAb[base] ? RED : 'transparent',
+                          borderColor: mobileAb[base] ? RED : GOLD,
+                          color: mobileAb[base] ? CREAM : NAVY,
+                        }}
                         onClick={() => toggleBase(mobilePlayerIdx, mobileInningIdx, base)}
                       >
                         {i === 3 ? 'H' : i + 1}
@@ -440,6 +463,7 @@ export default function BaseballView() {
                   <Button
                     variant="ghost"
                     className="w-full"
+                    style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}
                     onClick={() => handleMobileResult('')}
                   >
                     Clear
@@ -452,33 +476,43 @@ export default function BaseballView() {
           /* STATS VIEW */
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Stats header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b">
-              <Button variant="ghost" size="sm" onClick={() => setMobileView('card')}>
+            <div className="flex items-center justify-between px-3 py-2" style={{ borderBottom: `1px solid ${GOLD}` }}>
+              <Button variant="ghost" size="sm" onClick={() => setMobileView('card')}
+                style={{ fontFamily: FONT_HEAD, color: NAVY }}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
               <div className="flex items-center gap-1">
                 {teams.map((team, idx) => (
                   <button
                     key={idx}
-                    className={`px-2 py-1 text-sm font-mono rounded transition-colors ${activeTeam === idx ? 'bg-foreground text-background font-bold' : 'text-muted-foreground'}`}
+                    className="px-2 py-1 text-sm rounded transition-colors"
+                    style={{
+                      fontFamily: FONT_HEAD,
+                      fontWeight: activeTeam === idx ? 800 : 500,
+                      background: activeTeam === idx ? NAVY : 'transparent',
+                      color: activeTeam === idx ? CREAM : '#5A3E28',
+                    }}
                     onClick={() => setActiveTeam(idx)}
                   >
                     {team.name}
                   </button>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={resetScorecard}>
+              <Button variant="outline" size="sm" onClick={resetScorecard}
+                style={{ borderColor: GOLD, color: NAVY }}>
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </div>
 
             {/* Linescore */}
-            <div className="flex items-center px-3 py-2 bg-muted text-xs font-mono border-b">
-              <span className="w-20 font-bold truncate">{teams[activeTeam].name}</span>
+            <div className="flex items-center px-3 py-2 text-xs" style={{ background: NAVY, color: CREAM, borderBottom: `1px solid ${GOLD}`, fontFamily: FONT_MONO }}>
+              <span className="w-20 font-bold truncate" style={{ fontFamily: FONT_HEAD, letterSpacing: '0.05em' }}>
+                {teams[activeTeam].name}
+              </span>
               {innings.map((_, i) => (
                 <span key={i} className="w-6 text-center">{getInningRuns(i) || '-'}</span>
               ))}
-              <span className="w-8 text-center font-bold ml-2">
+              <span className="w-8 text-center font-bold ml-2" style={{ color: GOLD }}>
                 {atBats.flat().filter(ab => ab.home).length}R
               </span>
             </div>
@@ -492,33 +526,34 @@ export default function BaseballView() {
                 return (
                   <div
                     key={pIdx}
-                    className="flex items-center justify-between px-3 py-3 border-b cursor-pointer active:bg-accent/50 transition-colors"
+                    className="flex items-center justify-between px-3 py-3 cursor-pointer transition-colors"
+                    style={{ borderBottom: `1px solid ${GOLD}` }}
                     onClick={() => { setMobilePlayerIdx(pIdx); setMobileView('card'); }}
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-xs text-muted-foreground w-4">{pIdx + 1}</span>
+                      <span className="text-xs w-4" style={{ color: '#5A3E28', fontFamily: FONT_MONO }}>{pIdx + 1}</span>
                       <div className="min-w-0">
-                        <span className="font-mono font-bold text-sm truncate">
+                        <span className="font-bold text-sm truncate" style={{ fontFamily: FONT_HEAD, color: NAVY, letterSpacing: '0.03em' }}>
                           {player.num ? `#${player.num} ` : ''}{player.name || `Batter ${pIdx + 1}`}
                         </span>
-                        <span className="text-xs text-muted-foreground ml-2">{player.pos || '--'}</span>
+                        <span className="text-xs ml-2" style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}>{player.pos || '--'}</span>
                       </div>
                     </div>
-                    <div className="flex gap-3 text-xs font-mono shrink-0">
+                    <div className="flex gap-3 text-xs shrink-0" style={{ fontFamily: FONT_MONO, color: NAVY }}>
                       <span>AB:{pAB}</span>
                       <span>H:{pH}</span>
-                      <span>R:{pR}</span>
+                      <span style={{ color: RED, fontWeight: 700 }}>R:{pR}</span>
                     </div>
                   </div>
                 );
               })}
               {/* Totals row */}
-              <div className="flex items-center justify-between px-3 py-3 bg-muted/50 font-bold">
-                <span className="text-sm">TOTALS</span>
-                <div className="flex gap-3 text-xs font-mono">
+              <div className="flex items-center justify-between px-3 py-3 font-bold" style={{ background: NAVY, color: CREAM }}>
+                <span className="text-sm" style={{ fontFamily: FONT_HEAD, letterSpacing: '0.06em' }}>TOTALS</span>
+                <div className="flex gap-3 text-xs" style={{ fontFamily: FONT_MONO }}>
                   <span>AB:{atBats.flat().filter(ab => ab.result && !['BB', 'HBP'].includes(ab.result)).length}</span>
                   <span>H:{getTotalHits()}</span>
-                  <span>R:{atBats.flat().filter(ab => ab.home).length}</span>
+                  <span style={{ color: GOLD }}>R:{atBats.flat().filter(ab => ab.home).length}</span>
                 </div>
               </div>
             </div>
@@ -526,16 +561,20 @@ export default function BaseballView() {
         )}
       </div>
 
-      {/* DESKTOP LAYOUT (existing, unchanged) */}
+      {/* DESKTOP LAYOUT */}
       <div className="hidden md:flex flex-1 flex-col p-2 md:p-4 overflow-auto">
-        <Card className="w-full max-w-6xl mx-auto">
-          <CardHeader className="pb-2">
+        <Card className="w-full max-w-6xl mx-auto" style={{ border: `2px solid ${GOLD}`, borderRadius: '4px' }}>
+          <CardHeader className="pb-2" style={{ background: NAVY, borderRadius: '2px 2px 0 0', borderBottom: `2px solid ${GOLD}` }}>
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 {teams.map((team, idx) => (
                   <div
                     key={idx}
-                    className={`cursor-pointer px-1 pb-1 transition-all flex items-center gap-1 ${activeTeam === idx ? 'border-b-2 border-foreground' : 'text-muted-foreground opacity-50 hover:opacity-75'}`}
+                    className="cursor-pointer px-1 pb-1 transition-all flex items-center gap-1"
+                    style={{
+                      borderBottom: activeTeam === idx ? `3px solid ${GOLD}` : '3px solid transparent',
+                      opacity: activeTeam === idx ? 1 : 0.5,
+                    }}
                     onClick={() => setActiveTeam(idx)}
                   >
                     <span className="text-lg">{idx === 0 ? '⚾' : '🏟️'}</span>
@@ -543,63 +582,74 @@ export default function BaseballView() {
                       value={team.name}
                       onChange={(e) => updateTeamName(idx, e.target.value.toUpperCase())}
                       onClick={(e) => { setActiveTeam(idx); e.stopPropagation(); }}
-                      className={`h-8 w-28 font-mono text-sm border-0 bg-transparent text-center ${activeTeam === idx ? 'font-bold' : ''}`}
+                      className="h-8 w-28 border-0 bg-transparent text-center"
+                      style={{
+                        fontFamily: FONT_HEAD,
+                        fontWeight: 800,
+                        fontSize: '14px',
+                        color: CREAM,
+                        letterSpacing: '0.08em',
+                      }}
                       maxLength={12}
                     />
                   </div>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={resetScorecard}>
+              <Button variant="outline" size="sm" onClick={resetScorecard}
+                style={{ fontFamily: FONT_HEAD, borderColor: GOLD, color: CREAM, background: 'transparent' }}>
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Reset
               </Button>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-2">
+          <CardContent className="p-2" style={{ background: PARCH }}>
             {/* Scorecard Grid */}
             <div className="overflow-x-auto">
-              <table className="border-collapse text-xs font-mono">
+              <table className="border-collapse text-xs" style={{ fontFamily: FONT_MONO }}>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="border border-foreground/30 p-1 w-8 text-center">#</th>
-                    <th className="border border-foreground/30 p-1 w-28 text-left">PLAYER</th>
-                    <th className="border border-foreground/30 p-1 w-8 text-center">POS</th>
+                  <tr style={{ background: NAVY }}>
+                    <th className="p-1 w-8 text-center" style={{ border: `1px solid ${GOLD}`, color: CREAM, fontFamily: FONT_HEAD, letterSpacing: '0.06em' }}>#</th>
+                    <th className="p-1 w-28 text-left"   style={{ border: `1px solid ${GOLD}`, color: CREAM, fontFamily: FONT_HEAD, letterSpacing: '0.06em' }}>PLAYER</th>
+                    <th className="p-1 w-8 text-center"  style={{ border: `1px solid ${GOLD}`, color: CREAM, fontFamily: FONT_HEAD, letterSpacing: '0.06em' }}>POS</th>
                     {innings.map(i => (
-                      <th key={i} className="border border-foreground/30 p-1 w-16 text-center font-bold">{i}</th>
+                      <th key={i} className="p-1 w-16 text-center font-bold" style={{ border: `1px solid ${GOLD}`, color: GOLD, fontFamily: FONT_HEAD, fontSize: '13px' }}>{i}</th>
                     ))}
-                    <th className="border border-foreground/30 p-1 w-8 text-center bg-muted/80">AB</th>
-                    <th className="border border-foreground/30 p-1 w-8 text-center bg-muted/80">H</th>
-                    <th className="border border-foreground/30 p-1 w-8 text-center bg-muted/80">R</th>
+                    <th className="p-1 w-8 text-center" style={{ border: `1px solid ${GOLD}`, color: CREAM, fontFamily: FONT_HEAD, background: 'rgba(196,162,101,0.15)' }}>AB</th>
+                    <th className="p-1 w-8 text-center" style={{ border: `1px solid ${GOLD}`, color: CREAM, fontFamily: FONT_HEAD, background: 'rgba(196,162,101,0.15)' }}>H</th>
+                    <th className="p-1 w-8 text-center" style={{ border: `1px solid ${GOLD}`, color: GOLD,  fontFamily: FONT_HEAD, background: 'rgba(196,162,101,0.15)' }}>R</th>
                   </tr>
                 </thead>
                 <tbody>
                   {players.map((player, pIdx) => (
-                    <tr key={pIdx}>
+                    <tr key={pIdx} style={{ background: pIdx % 2 === 0 ? 'transparent' : 'rgba(196,162,101,0.06)' }}>
                       {/* Jersey Number */}
-                      <td className="border border-foreground/30 p-0">
+                      <td className="p-0" style={{ border: `1px solid ${GOLD}` }}>
                         <Input
                           value={player.num}
                           onChange={(e) => updatePlayer(pIdx, 'num', e.target.value)}
                           className="h-14 w-full text-center text-xs border-0 bg-transparent p-0"
+                          style={{ fontFamily: FONT_HEAD, color: NAVY, fontWeight: 700 }}
                           maxLength={2}
                           placeholder="--"
                         />
                       </td>
                       {/* Player Name */}
-                      <td className="border border-foreground/30 p-0">
+                      <td className="p-0" style={{ border: `1px solid ${GOLD}` }}>
                         <Input
                           value={player.name}
                           onChange={(e) => updatePlayer(pIdx, 'name', e.target.value)}
                           className="h-14 w-full text-xs border-0 bg-transparent px-1"
+                          style={{ fontFamily: FONT_HEAD, color: NAVY, fontWeight: 600 }}
                           placeholder={`Batter ${pIdx + 1}`}
                         />
                       </td>
                       {/* Position */}
-                      <td className="border border-foreground/30 p-0">
+                      <td className="p-0" style={{ border: `1px solid ${GOLD}` }}>
                         <Input
                           value={player.pos}
                           onChange={(e) => updatePlayer(pIdx, 'pos', e.target.value.toUpperCase())}
                           className="h-14 w-full text-center text-xs border-0 bg-transparent p-0"
+                          style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}
                           maxLength={2}
                           placeholder="--"
                         />
@@ -613,54 +663,53 @@ export default function BaseballView() {
                         const cellHasResult = ab.result !== '';
                         const inningClosed = inningOuts >= 3 && !cellHasResult;
                         return (
-                          <td key={iIdx} className={`border border-foreground/30 p-0 [&>button]:p-0 ${inningClosed ? 'bg-muted/50' : ''}`}>
+                          <td key={iIdx} className="p-0 [&>button]:p-0"
+                            style={{ border: `1px solid ${GOLD}`, background: inningClosed ? 'rgba(196,162,101,0.12)' : 'transparent' }}>
                             <Popover open={openPopover === cellKey} onOpenChange={(open) => !inningClosed && setOpenPopover(open ? cellKey : null)}>
-                              <PopoverTrigger render={<div className={`w-full h-14 transition-colors cursor-pointer ${inningClosed ? 'cursor-not-allowed opacity-30' : 'hover:bg-accent/30'}`} />}>
-                                {/* Diamond Shape */}
+                              <PopoverTrigger render={<div className={`w-full h-14 transition-colors ${inningClosed ? 'cursor-not-allowed opacity-30' : 'cursor-pointer hover:bg-[rgba(196,162,101,0.15)]'}`} />}>
                                 <svg viewBox="0 0 68 56" className="w-full h-full">
-                                    {/* Diamond outline */}
-                                    <path
-                                      d="M34 4 L56 28 L34 52 L12 28 Z"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="1.5"
-                                      className="text-foreground/40"
-                                    />
-                                    {/* Base lines when reached */}
-                                    {ab.first && (
-                                      <line x1="34" y1="52" x2="56" y2="28" stroke="currentColor" strokeWidth="3" className="text-foreground" />
-                                    )}
-                                    {ab.second && (
-                                      <line x1="56" y1="28" x2="34" y2="4" stroke="currentColor" strokeWidth="3" className="text-foreground" />
-                                    )}
-                                    {ab.third && (
-                                      <line x1="34" y1="4" x2="12" y2="28" stroke="currentColor" strokeWidth="3" className="text-foreground" />
-                                    )}
-                                    {ab.home && (
-                                      <>
-                                        <line x1="12" y1="28" x2="34" y2="52" stroke="currentColor" strokeWidth="3" className="text-foreground" />
-                                        {/* Fill diamond for run scored */}
-                                        <path d="M34 8 L52 28 L34 48 L16 28 Z" fill="currentColor" className="text-foreground/20" />
-                                      </>
-                                    )}
-                                    {/* Result text in center */}
-                                    <text x="34" y="28" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill="currentColor">
-                                      {ab.result}
-                                    </text>
-                                    {/* Out number in filled circle, bottom right */}
-                                    {cellIsOut && (
-                                      <>
-                                        <circle cx="57" cy="46" r="8" fill="currentColor" className="text-foreground" />
-                                        <text x="57" y="46" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill="white">
-                                          {getOutNumber(pIdx, iIdx)}
-                                        </text>
-                                      </>
-                                    )}
-                                  </svg>
+                                  {/* Diamond outline */}
+                                  <path
+                                    d="M34 4 L56 28 L34 52 L12 28 Z"
+                                    fill="none"
+                                    stroke={GOLD}
+                                    strokeWidth="1.5"
+                                    strokeOpacity="0.6"
+                                  />
+                                  {/* Base lines when reached */}
+                                  {ab.first && (
+                                    <line x1="34" y1="52" x2="56" y2="28" stroke={RED} strokeWidth="3" />
+                                  )}
+                                  {ab.second && (
+                                    <line x1="56" y1="28" x2="34" y2="4" stroke={RED} strokeWidth="3" />
+                                  )}
+                                  {ab.third && (
+                                    <line x1="34" y1="4" x2="12" y2="28" stroke={RED} strokeWidth="3" />
+                                  )}
+                                  {ab.home && (
+                                    <>
+                                      <line x1="12" y1="28" x2="34" y2="52" stroke={RED} strokeWidth="3" />
+                                      <path d="M34 8 L52 28 L34 48 L16 28 Z" fill={RED} fillOpacity="0.12" />
+                                    </>
+                                  )}
+                                  {/* Result text in center */}
+                                  <text x="34" y="28" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill={NAVY} style={{ fontFamily: FONT_HEAD }}>
+                                    {ab.result}
+                                  </text>
+                                  {/* Out number in filled circle, bottom right */}
+                                  {cellIsOut && (
+                                    <>
+                                      <circle cx="57" cy="46" r="8" fill={RED} />
+                                      <text x="57" y="46" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold" fill={CREAM}>
+                                        {getOutNumber(pIdx, iIdx)}
+                                      </text>
+                                    </>
+                                  )}
+                                </svg>
                               </PopoverTrigger>
-                              <PopoverContent className="w-64 p-2">
+                              <PopoverContent className="w-64 p-2" style={{ borderColor: GOLD }}>
                                 <div className="space-y-2">
-                                  <p className="text-xs font-semibold text-muted-foreground">Quick Entry:</p>
+                                  <p className="text-xs font-semibold" style={{ fontFamily: FONT_HEAD, color: NAVY, letterSpacing: '0.05em' }}>Quick Entry:</p>
                                   <div className="grid grid-cols-5 gap-1">
                                     {quickResults.map(r => {
                                       const rIsOut = isOutResult(r);
@@ -671,7 +720,8 @@ export default function BaseballView() {
                                           key={r}
                                           variant="outline"
                                           size="sm"
-                                          className="h-7 text-xs font-mono"
+                                          className="h-7 text-xs"
+                                          style={{ fontFamily: FONT_MONO, borderColor: GOLD, color: NAVY }}
                                           disabled={wouldExceed}
                                           onClick={() => updateAtBat(pIdx, iIdx, r)}
                                         >
@@ -681,12 +731,15 @@ export default function BaseballView() {
                                     })}
                                   </div>
                                   {inningOuts >= 3 && !cellIsOut && (
-                                    <p className="text-xs text-destructive font-semibold">3 outs recorded in inning {iIdx + 1}</p>
+                                    <p className="text-xs font-semibold" style={{ fontFamily: FONT_MONO, color: RED }}>
+                                      3 outs recorded in inning {iIdx + 1}
+                                    </p>
                                   )}
                                   <div className="flex gap-1 mt-2">
                                     <Input
                                       placeholder="Custom..."
-                                      className="h-7 text-xs font-mono"
+                                      className="h-7 text-xs"
+                                      style={{ fontFamily: FONT_MONO, borderColor: GOLD }}
                                       onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                                         if (e.key === 'Enter') {
                                           updateAtBat(pIdx, iIdx, e.currentTarget.value.toUpperCase());
@@ -694,14 +747,20 @@ export default function BaseballView() {
                                       }}
                                     />
                                   </div>
-                                  <div className="flex gap-2 pt-2 border-t">
-                                    <p className="text-xs text-muted-foreground">Bases:</p>
+                                  <div className="flex gap-2 pt-2" style={{ borderTop: `1px solid ${GOLD}` }}>
+                                    <p className="text-xs" style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}>Bases:</p>
                                     {(['first', 'second', 'third', 'home'] as Base[]).map((base, i) => (
                                       <Button
                                         key={base}
                                         variant={ab[base] ? 'default' : 'outline'}
                                         size="sm"
                                         className="h-6 w-6 p-0 text-xs"
+                                        style={{
+                                          fontFamily: FONT_HEAD,
+                                          background: ab[base] ? RED : 'transparent',
+                                          borderColor: ab[base] ? RED : GOLD,
+                                          color: ab[base] ? CREAM : NAVY,
+                                        }}
                                         onClick={() => toggleBase(pIdx, iIdx, base)}
                                       >
                                         {i === 3 ? 'H' : i + 1}
@@ -712,6 +771,7 @@ export default function BaseballView() {
                                     variant="ghost"
                                     size="sm"
                                     className="w-full h-6 text-xs"
+                                    style={{ fontFamily: FONT_MONO, color: '#5A3E28' }}
                                     onClick={() => updateAtBat(pIdx, iIdx, '')}
                                   >
                                     Clear
@@ -723,30 +783,34 @@ export default function BaseballView() {
                         );
                       })}
                       {/* Stats */}
-                      <td className="border border-foreground/30 p-1 text-center bg-muted/30">
+                      <td className="p-1 text-center" style={{ border: `1px solid ${GOLD}`, background: 'rgba(196,162,101,0.1)', fontFamily: FONT_MONO, color: NAVY }}>
                         {atBats[pIdx].filter(ab => ab.result && !['BB', 'HBP'].includes(ab.result)).length}
                       </td>
-                      <td className="border border-foreground/30 p-1 text-center bg-muted/30">
+                      <td className="p-1 text-center" style={{ border: `1px solid ${GOLD}`, background: 'rgba(196,162,101,0.1)', fontFamily: FONT_MONO, color: NAVY }}>
                         {atBats[pIdx].filter(ab => ['1B', '2B', '3B', 'HR'].some(h => ab.result.includes(h))).length}
                       </td>
-                      <td className="border border-foreground/30 p-1 text-center bg-muted/30">
+                      <td className="p-1 text-center" style={{ border: `1px solid ${GOLD}`, background: 'rgba(196,162,101,0.1)', fontFamily: FONT_HEAD, color: RED, fontWeight: 700 }}>
                         {atBats[pIdx].filter(ab => ab.home).length}
                       </td>
                     </tr>
                   ))}
                   {/* Totals Row */}
-                  <tr className="bg-muted/50 font-bold">
-                    <td colSpan={3} className="border border-foreground/30 p-1 text-right pr-2">TOTALS</td>
+                  <tr style={{ background: NAVY }}>
+                    <td colSpan={3} className="p-1 text-right pr-2" style={{ border: `1px solid ${GOLD}`, fontFamily: FONT_HEAD, color: CREAM, letterSpacing: '0.08em', fontWeight: 800 }}>
+                      TOTALS
+                    </td>
                     {innings.map((_, iIdx) => (
-                      <td key={iIdx} className="border border-foreground/30 p-1 text-center">
+                      <td key={iIdx} className="p-1 text-center" style={{ border: `1px solid ${GOLD}`, fontFamily: FONT_HEAD, color: getInningRuns(iIdx) > 0 ? GOLD : 'rgba(196,162,101,0.4)', fontWeight: 700, fontSize: '13px' }}>
                         {getInningRuns(iIdx) || ''}
                       </td>
                     ))}
-                    <td className="border border-foreground/30 p-1 text-center">
+                    <td className="p-1 text-center" style={{ border: `1px solid ${GOLD}`, fontFamily: FONT_MONO, color: CREAM }}>
                       {atBats.flat().filter(ab => ab.result && !['BB', 'HBP'].includes(ab.result)).length}
                     </td>
-                    <td className="border border-foreground/30 p-1 text-center">{getTotalHits()}</td>
-                    <td className="border border-foreground/30 p-1 text-center">
+                    <td className="p-1 text-center" style={{ border: `1px solid ${GOLD}`, fontFamily: FONT_MONO, color: CREAM }}>
+                      {getTotalHits()}
+                    </td>
+                    <td className="p-1 text-center" style={{ border: `1px solid ${GOLD}`, fontFamily: FONT_HEAD, color: GOLD, fontWeight: 800, fontSize: '13px' }}>
                       {atBats.flat().filter(ab => ab.home).length}
                     </td>
                   </tr>
@@ -755,15 +819,16 @@ export default function BaseballView() {
             </div>
 
             {/* Legend */}
-            <div className="mt-4 p-3 bg-muted/30 rounded-lg text-xs font-mono grid grid-cols-2 md:grid-cols-4 gap-2">
-              <div><strong>K</strong> = Strikeout</div>
-              <div><strong>BB</strong> = Walk</div>
-              <div><strong>1B/2B/3B</strong> = Single/Double/Triple</div>
-              <div><strong>HR</strong> = Home Run</div>
-              <div><strong>F7/F8/F9</strong> = Fly out to LF/CF/RF</div>
-              <div><strong>6-3</strong> = SS to 1B groundout</div>
-              <div><strong>DP</strong> = Double Play</div>
-              <div><strong>Positions</strong>: 1-P 2-C 3-1B 4-2B 5-3B 6-SS 7-LF 8-CF 9-RF</div>
+            <div className="mt-4 p-3 rounded-sm grid grid-cols-2 md:grid-cols-4 gap-2 text-xs"
+              style={{ background: 'rgba(27,40,56,0.06)', border: `1px solid ${GOLD}`, fontFamily: FONT_MONO, color: '#5A3E28' }}>
+              <div><strong style={{ color: NAVY }}>K</strong> = Strikeout</div>
+              <div><strong style={{ color: NAVY }}>BB</strong> = Walk</div>
+              <div><strong style={{ color: NAVY }}>1B/2B/3B</strong> = Single/Double/Triple</div>
+              <div><strong style={{ color: RED }}>HR</strong> = Home Run</div>
+              <div><strong style={{ color: NAVY }}>F7/F8/F9</strong> = Fly out to LF/CF/RF</div>
+              <div><strong style={{ color: NAVY }}>6-3</strong> = SS to 1B groundout</div>
+              <div><strong style={{ color: NAVY }}>DP</strong> = Double Play</div>
+              <div><strong style={{ color: NAVY }}>Positions</strong>: 1-P 2-C 3-1B 4-2B 5-3B 6-SS 7-LF 8-CF 9-RF</div>
             </div>
           </CardContent>
         </Card>
