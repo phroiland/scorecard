@@ -20,14 +20,14 @@
   text-overflow: unset !important;
 }
 
-/* === Scorecard Brand Styles === */
+/* === Scorecard Brand Styles — always navy, no light/dark split === */
 
 /* Card shell */
 .scorecard-view [data-slot="card"] {
-  border: 1px solid #dde3ee !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
   border-radius: 14px !important;
-  background: #ffffff !important;
-  box-shadow: 0 14px 40px rgba(10,28,59,.1) !important;
+  background: #0f172a !important;
+  box-shadow: 0 14px 40px rgba(0,0,0,.4) !important;
   overflow: hidden !important;
 }
 
@@ -43,12 +43,12 @@
   color: #ffffff !important;
 }
 
-/* White content area */
+/* Card content */
 .scorecard-view [data-slot="card-content"] {
-  background: #ffffff !important;
+  background: #0f172a !important;
 }
 
-/* Table headers — navy */
+/* Table headers */
 .scorecard-view table th {
   background: #0a1c3b !important;
   color: #ffffff !important;
@@ -70,34 +70,34 @@
   color: #f4b41a !important;
 }
 
-/* Table cells — clean white */
+/* Table cells — always dark */
 .scorecard-view table td {
-  border: 1px solid #dde3ee !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
   font-family: 'Special Elite', 'Courier New', monospace !important;
-  color: #0c1626 !important;
-  background: #ffffff !important;
+  color: #e2e8f0 !important;
+  background: #0f172a !important;
 }
 
 .scorecard-view table tr:nth-child(even) td {
-  background: #f5f7fb !important;
+  background: #1e293b !important;
 }
 
 .scorecard-view table td.stat-col {
-  background: #eaeef6 !important;
-  color: #0c1626 !important;
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
   text-align: center;
   font-weight: 700;
 }
 
 .scorecard-view table td.run-col {
-  background: #eaeef6 !important;
+  background: #1e293b !important;
   color: #F0962A !important;
   font-family: 'Archivo', sans-serif !important;
   font-weight: 900 !important;
   text-align: center;
 }
 
-/* Totals row — navy */
+/* Totals row */
 .scorecard-view table tr.totals-row td {
   background: #0a1c3b !important;
   color: #ffffff !important;
@@ -105,6 +105,7 @@
   font-weight: 800 !important;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  border-color: rgba(255,255,255,.08) !important;
 }
 
 .scorecard-view table tr.totals-row td.run-col {
@@ -116,10 +117,10 @@
   color: #f4b41a !important;
 }
 
-/* Inputs within table — transparent, inherit color */
+/* Inputs within table */
 .scorecard-view table input {
   font-family: 'Playfair Display', Georgia, serif !important;
-  color: #0c1626 !important;
+  color: #e2e8f0 !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -127,15 +128,15 @@
 
 /* Legend */
 .scorecard-view .scorecard-legend {
-  background: #f5f7fb !important;
-  border: 1px solid #dde3ee !important;
+  background: #1e293b !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
   border-radius: 8px !important;
   font-family: 'Special Elite', 'Courier New', monospace !important;
-  color: #5c6b82 !important;
+  color: #94a3b8 !important;
 }
 
 .scorecard-view .scorecard-legend strong {
-  color: #0a1c3b;
+  color: #e2e8f0;
   font-family: 'Archivo', sans-serif;
 }
 
@@ -145,13 +146,13 @@
 
 /* Mobile */
 .scorecard-view .mobile-bar {
-  border-bottom: 1px solid #dde3ee !important;
-  background: #ffffff;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  background: #0f172a !important;
 }
 
 .scorecard-view .mobile-bar-top {
-  border-top: 1px solid #dde3ee !important;
-  background: #ffffff;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+  background: #0f172a !important;
 }
 
 .scorecard-view .linescore {
@@ -174,29 +175,29 @@
 }
 
 .scorecard-view .player-row {
-  border-bottom: 1px solid #dde3ee !important;
-  background: #ffffff;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  background: #0f172a !important;
 }
 
 .scorecard-view .player-row:hover {
-  background: #f5f7fb !important;
+  background: #1e293b !important;
 }
 
 .scorecard-view .player-name {
   font-family: 'Playfair Display', Georgia, serif !important;
-  color: #0a1c3b !important;
+  color: #e2e8f0 !important;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .scorecard-view .player-pos {
   font-family: 'Special Elite', 'Courier New', monospace !important;
-  color: #5c6b82 !important;
+  color: #94a3b8 !important;
 }
 
 .scorecard-view .player-stats {
   font-family: 'Special Elite', 'Courier New', monospace !important;
-  color: #0c1626 !important;
+  color: #e2e8f0 !important;
 }
 
 .scorecard-view .player-stats .runs {
@@ -222,19 +223,19 @@
 
 .scorecard-view .batter-name {
   font-family: 'Playfair Display', Georgia, serif !important;
-  color: #0a1c3b !important;
+  color: #e2e8f0 !important;
   letter-spacing: 0.04em;
 }
 
 .scorecard-view .batter-sub {
   font-family: 'Special Elite', 'Courier New', monospace !important;
-  color: #5c6b82 !important;
+  color: #94a3b8 !important;
 }
 
 .scorecard-view .inning-label {
   font-family: 'Archivo', sans-serif !important;
   font-weight: 800 !important;
-  color: #0a1c3b !important;
+  color: #e2e8f0 !important;
   letter-spacing: 0.04em;
 }
 
@@ -487,60 +488,3 @@ div.min-h-screen > footer [data-slot="separator"] {
   opacity: 1;
 }
 
-/* Dark mode */
-.dark .scorecard-view [data-slot="card"] {
-  background: #0f172a !important;
-  border-color: rgba(255,255,255,.08) !important;
-}
-
-.dark .scorecard-view [data-slot="card-content"] {
-  background: #0f172a !important;
-}
-
-.dark .scorecard-view table td {
-  background: #0f172a !important;
-  color: #e2e8f0 !important;
-  border-color: rgba(255,255,255,.08) !important;
-}
-
-.dark .scorecard-view table tr:nth-child(even) td {
-  background: #1e293b !important;
-}
-
-.dark .scorecard-view table td.stat-col {
-  background: #1e293b !important;
-  color: #e2e8f0 !important;
-}
-
-.dark .scorecard-view table td.run-col {
-  background: #1e293b !important;
-}
-
-.dark .scorecard-view table input {
-  color: #e2e8f0 !important;
-}
-
-.dark .scorecard-view .mobile-bar,
-.dark .scorecard-view .mobile-bar-top,
-.dark .scorecard-view .player-row {
-  background: #0f172a !important;
-  border-color: rgba(255,255,255,.08) !important;
-}
-
-.dark .scorecard-view .batter-name {
-  color: #e2e8f0 !important;
-}
-
-.dark .scorecard-view .inning-label {
-  color: #e2e8f0 !important;
-}
-
-.dark .scorecard-view .scorecard-legend {
-  background: #1e293b !important;
-  border-color: rgba(255,255,255,.08) !important;
-  color: #94a3b8 !important;
-}
-
-.dark .scorecard-view .scorecard-legend strong {
-  color: #e2e8f0;
-}
