@@ -21,7 +21,7 @@ import type { BackendConfig, BoundDatabase, CsrfTokenEntry, DatabaseConfig, JwtP
 type AppEnv = { Variables: { userID: string } };
 
 // ==== SERVER CONFIG ====
-const port = parseInt(process.env.PORT || "8000");
+const port = parseInt(process.env.PORT || "8001");
 
 // ==== STRUCTURED LOGGING ====
 // Defined early so all code can use it (no external dependencies)
@@ -475,7 +475,7 @@ const __dirname = dirname(__filename);
 // Use CORS_ORIGINS env var in production, fallback to localhost for development
 const corsOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map(o => o.trim())
-  : ['http://localhost:5173', 'http://localhost:8000', 'http://127.0.0.1:5173', 'http://127.0.0.1:8000'];
+  : ['http://localhost:5173', 'http://localhost:8001', 'http://127.0.0.1:5173', 'http://127.0.0.1:8001'];
 
 app.use('*', cors({
   origin: corsOrigins,
