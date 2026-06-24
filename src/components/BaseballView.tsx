@@ -357,7 +357,7 @@ export default function BaseballView() {
                       const wouldExceed = rIsOut && !mobileCellIsOut && mobileInningOuts + rOuts > 3;
                       return (
                         <Button key={r} variant="outline" className="h-10 text-sm"
-                          style={{ fontFamily: FONT_MONO, borderColor: LINE, color: INK }}
+                          style={{ fontFamily: FONT_MONO, borderColor: GOLD, color: GOLD }}
                           disabled={wouldExceed}
                           onClick={() => handleMobileResult(r)}>
                           {r}
@@ -379,15 +379,15 @@ export default function BaseballView() {
                     }}
                   />
                   <div className="flex items-center gap-2 pt-2" style={{ borderTop: `1px solid ${LINE}` }}>
-                    <span className="text-sm" style={{ fontFamily: FONT_MONO, color: '#5c6b82' }}>Bases:</span>
+                    <span className="text-sm" style={{ fontFamily: FONT_MONO, color: GOLD }}>Bases:</span>
                     {(['first', 'second', 'third', 'home'] as Base[]).map((base, i) => (
                       <Button key={base} variant={mobileAb[base] ? 'default' : 'outline'} size="sm"
                         className="h-8 w-8 p-0"
                         style={{
                           fontFamily: FONT_HEAD,
                           background: mobileAb[base] ? ORANGE : 'transparent',
-                          borderColor: mobileAb[base] ? ORANGE : LINE,
-                          color: mobileAb[base] ? WHITE : NAVY,
+                          borderColor: mobileAb[base] ? ORANGE : GOLD,
+                          color: mobileAb[base] ? WHITE : GOLD,
                         }}
                         onClick={() => toggleBase(mobilePlayerIdx, mobileInningIdx, base)}>
                         {i === 3 ? 'H' : i + 1}
@@ -395,7 +395,7 @@ export default function BaseballView() {
                     ))}
                   </div>
                   <Button variant="ghost" className="w-full"
-                    style={{ fontFamily: FONT_MONO, color: '#5c6b82' }}
+                    style={{ fontFamily: FONT_MONO, color: GOLD }}
                     onClick={() => handleMobileResult('')}>
                     Clear
                   </Button>
@@ -603,7 +603,7 @@ export default function BaseballView() {
                                       return (
                                         <Button key={r} variant="outline" size="sm"
                                           className="h-7 text-xs"
-                                          style={{ fontFamily: FONT_MONO, borderColor: LINE, color: INK }}
+                                          style={{ fontFamily: FONT_MONO, borderColor: GOLD, color: GOLD }}
                                           disabled={wouldExceed}
                                           onClick={() => updateAtBat(pIdx, iIdx, r)}>
                                           {r}
@@ -622,15 +622,15 @@ export default function BaseballView() {
                                       }} />
                                   </div>
                                   <div className="flex gap-2 pt-2" style={{ borderTop: `1px solid ${LINE}` }}>
-                                    <p className="text-xs" style={{ fontFamily: FONT_MONO, color: '#5c6b82' }}>Bases:</p>
+                                    <p className="text-xs" style={{ fontFamily: FONT_MONO, color: GOLD }}>Bases:</p>
                                     {(['first', 'second', 'third', 'home'] as Base[]).map((base, i) => (
                                       <Button key={base} variant={ab[base] ? 'default' : 'outline'} size="sm"
                                         className="h-6 w-6 p-0 text-xs"
                                         style={{
                                           fontFamily: FONT_HEAD,
                                           background: ab[base] ? ORANGE : 'transparent',
-                          borderColor: ab[base] ? ORANGE : LINE,
-                          color: ab[base] ? WHITE : NAVY,
+                          borderColor: ab[base] ? ORANGE : GOLD,
+                          color: ab[base] ? WHITE : GOLD,
                                         }}
                                         onClick={() => toggleBase(pIdx, iIdx, base)}>
                                         {i === 3 ? 'H' : i + 1}
@@ -638,7 +638,7 @@ export default function BaseballView() {
                                     ))}
                                   </div>
                                   <Button variant="ghost" size="sm" className="w-full h-6 text-xs"
-                                    style={{ fontFamily: FONT_MONO, color: '#5c6b82' }}
+                                    style={{ fontFamily: FONT_MONO, color: GOLD }}
                                     onClick={() => updateAtBat(pIdx, iIdx, '')}>
                                     Clear
                                   </Button>
