@@ -289,7 +289,7 @@ export default function BaseballView() {
                   </>
                 )}
                 <text x="34" y="28" textAnchor="middle" dominantBaseline="central" fontSize="12" fontWeight="bold"
-                  fill={INK} style={{ fontFamily: FONT_MONO }}>
+                  fill={GOLD} style={{ fontFamily: FONT_MONO }}>
                   {mobileAb.result}
                 </text>
                 {mobileCellIsOut && (
@@ -579,7 +579,7 @@ export default function BaseballView() {
                                     </>
                                   )}
                                   <text x="34" y="28" textAnchor="middle" dominantBaseline="central" fontSize="10" fontWeight="bold"
-                                    fill={INK} style={{ fontFamily: FONT_MONO }}>
+                                    fill={GOLD} style={{ fontFamily: FONT_MONO }}>
                                     {ab.result}
                                   </text>
                                   {cellIsOut && (
