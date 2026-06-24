@@ -20,6 +20,235 @@
   text-overflow: unset !important;
 }
 
+/* === Scorecard Brand Styles === */
+
+.scorecard-view [data-slot="card"] {
+  border: 2px solid #C4A265 !important;
+  border-radius: 4px !important;
+  background: #F5E6C8 !important;
+}
+
+.scorecard-view [data-slot="card-header"] {
+  background: #1B2838 !important;
+  border-bottom: 2px solid #C4A265 !important;
+  border-radius: 2px 2px 0 0 !important;
+}
+
+.scorecard-view [data-slot="card-title"] {
+  color: #F5E6C8 !important;
+}
+
+.scorecard-view [data-slot="card-content"] {
+  background: rgba(245, 230, 200, 0.4) !important;
+}
+
+.scorecard-view table th {
+  background: #1B2838 !important;
+  color: #F5E6C8 !important;
+  font-family: 'Playfair Display', Georgia, serif !important;
+  border: 1px solid #C4A265 !important;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
+
+.scorecard-view table th.inning-col {
+  color: #C4A265 !important;
+  font-size: 13px;
+}
+
+.scorecard-view table th.stat-col {
+  background: rgba(27, 40, 56, 0.85) !important;
+}
+
+.scorecard-view table td {
+  border: 1px solid #C4A265 !important;
+  font-family: 'Special Elite', 'Courier New', monospace !important;
+  color: #1B2838 !important;
+}
+
+.scorecard-view table td.stat-col {
+  background: rgba(196, 162, 101, 0.12) !important;
+  text-align: center;
+}
+
+.scorecard-view table td.run-col {
+  background: rgba(196, 162, 101, 0.12) !important;
+  color: #8B2500 !important;
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-weight: 700 !important;
+  text-align: center;
+}
+
+.scorecard-view table tr.totals-row td {
+  background: #1B2838 !important;
+  color: #F5E6C8 !important;
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-weight: 700 !important;
+}
+
+.scorecard-view table tr.totals-row td.run-col {
+  color: #C4A265 !important;
+}
+
+.scorecard-view table tr.totals-row td.inning-run {
+  color: #C4A265 !important;
+  font-size: 13px;
+}
+
+.scorecard-view table tr:nth-child(even) td {
+  background: rgba(196, 162, 101, 0.06) !important;
+}
+
+.scorecard-view table tr:nth-child(even) td.stat-col,
+.scorecard-view table tr:nth-child(even) td.run-col {
+  background: rgba(196, 162, 101, 0.15) !important;
+}
+
+.scorecard-view input {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #1B2838 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.scorecard-view .scorecard-legend {
+  background: rgba(27, 40, 56, 0.06) !important;
+  border: 1px solid #C4A265 !important;
+  border-radius: 2px !important;
+  font-family: 'Special Elite', 'Courier New', monospace !important;
+  color: #5A3E28 !important;
+}
+
+.scorecard-view .scorecard-legend strong {
+  color: #1B2838;
+}
+
+.scorecard-view .scorecard-legend .hr-key {
+  color: #8B2500 !important;
+}
+
+/* Mobile scorecard styles */
+.scorecard-view .mobile-bar {
+  border-bottom: 1px solid #C4A265 !important;
+}
+
+.scorecard-view .mobile-bar-top {
+  border-top: 1px solid #C4A265 !important;
+}
+
+.scorecard-view .linescore {
+  background: #1B2838 !important;
+  color: #F5E6C8 !important;
+  border-bottom: 1px solid #C4A265 !important;
+  font-family: 'Special Elite', 'Courier New', monospace !important;
+}
+
+.scorecard-view .linescore .team-name {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.05em;
+}
+
+.scorecard-view .linescore .run-total {
+  color: #C4A265 !important;
+  font-weight: 700;
+}
+
+.scorecard-view .player-row {
+  border-bottom: 1px solid #C4A265 !important;
+}
+
+.scorecard-view .player-name {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #1B2838 !important;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.scorecard-view .player-pos {
+  font-family: 'Special Elite', 'Courier New', monospace !important;
+  color: #5A3E28 !important;
+}
+
+.scorecard-view .player-stats {
+  font-family: 'Special Elite', 'Courier New', monospace !important;
+  color: #1B2838 !important;
+}
+
+.scorecard-view .player-stats .runs {
+  color: #8B2500 !important;
+  font-weight: 700;
+}
+
+.scorecard-view .totals-mobile {
+  background: #1B2838 !important;
+  color: #F5E6C8 !important;
+}
+
+.scorecard-view .totals-mobile .label {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  letter-spacing: 0.06em;
+}
+
+.scorecard-view .totals-mobile .runs {
+  color: #C4A265 !important;
+}
+
+.scorecard-view [data-slot="drawer-title"] {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #1B2838 !important;
+  letter-spacing: 0.04em;
+}
+
+.scorecard-view [data-slot="popover-content"] {
+  border-color: #C4A265 !important;
+}
+
+.scorecard-view .popover-label {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #1B2838 !important;
+  letter-spacing: 0.05em;
+}
+
+.scorecard-view .batter-name {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #1B2838 !important;
+  letter-spacing: 0.04em;
+}
+
+.scorecard-view .batter-sub {
+  font-family: 'Special Elite', 'Courier New', monospace !important;
+  color: #5A3E28 !important;
+}
+
+.scorecard-view .inning-label {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #1B2838 !important;
+  letter-spacing: 0.04em;
+}
+
+.scorecard-view .out-warning {
+  font-family: 'Special Elite', 'Courier New', monospace !important;
+  color: #8B2500 !important;
+}
+
+/* Dark mode — keep scorecard on its vintage palette */
+.dark .scorecard-view [data-slot="card"] {
+  background: #EFD9B4 !important;
+}
+
+.dark .scorecard-view [data-slot="card-content"] {
+  background: rgba(239, 217, 180, 0.5) !important;
+}
+
+.dark .scorecard-view table td {
+  color: #1B2838 !important;
+}
+
+.dark .scorecard-view input {
+  color: #1B2838 !important;
+}
+
 /* === 1920s Vintage Baseball Landing Page === */
 
 /* Landing page root — parchment background with aged paper texture */
